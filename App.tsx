@@ -8,7 +8,7 @@ import * as tf from '@tensorflow/tfjs';
 import * as mobilenet from '@tensorflow-models/mobilenet';
 import { decodeJpeg } from '@tensorflow/tfjs-react-native';
 import * as FileSystem from 'expo-file-system';
-import { Classification, ClassificationProps } from './components/Classification';
+import { Classification, ClassificationProps } from './components/classification';
 
 export default function App() {
   const [selectedImageUri, setSelectedImageUri] = useState('');
@@ -31,7 +31,7 @@ export default function App() {
 
       if (!result.canceled) {
         const { uri } = result.assets[0];
-        console.log('URI da imagem selecionada:', uri);
+        //console.log('URI da imagem selecionada:', uri);
         setSelectedImageUri(uri);
         await imageClassification(uri);
       } else {
@@ -56,8 +56,8 @@ export default function App() {
       //console.log('Modelo MobileNet carregado:', model);
 
       const tensor = await createImageTensor(imageUri);
-      console.log('Forma do tensor:', tensor.shape);
-      console.log('DType do tensor:', tensor.dtype);
+      //console.log('Forma do tensor:', tensor.shape);
+      //console.log('DType do tensor:', tensor.dtype);
 
       const classificationResult = await model.classify(tensor);
       setResults(classificationResult);
