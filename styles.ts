@@ -42,6 +42,23 @@ export const styles = StyleSheet.create({
       width: width / 2,
       height: '100%',
     },
+
+    image: {
+      width: 250,
+      height: 250,
+      borderRadius: 7,
+      alignSelf: 'center',
+      marginTop: 32,
+    },
+    results:{
+      marginTop:64,
+      flex: 1,
+      flexDirection: "row",
+      flexWrap:"wrap",
+      gap:16,
+      justifyContent:"center"
+    },
+
     scanButtonContainer: {
       position: 'absolute',
       bottom: 80,
