@@ -1,23 +1,27 @@
-import { StatusBar } from 'expo-status-bar';
-import { useState } from 'react';
-import { styles } from './styles';
-import { View, Text, Image, ImageBackground, StyleSheet, TouchableOpacity, Dimensions, ActivityIndicator } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, Image, TouchableOpacity, Dimensions, ActivityIndicator } from 'react-native';
 
-import { Button } from './components/button';
 import * as imagePicker from 'expo-image-picker';
 import * as tf from '@tensorflow/tfjs';
-import * as mobilenet from '@tensorflow-models/mobilenet';
-import { decodeJpeg } from '@tensorflow/tfjs-react-native';
+import { bundleResourceIO, decodeJpeg } from '@tensorflow/tfjs-react-native';
 import * as FileSystem from 'expo-file-system';
+
 import { Classification, ClassificationProps } from './components/classification';
 
-import React from 'react';
-import { House, ListMagnifyingGlass, ChatsCircle } from 'phosphor-react-native';
-import Svg, { Circle, SvgUri } from 'react-native-svg';
-import plantNormal from './assets/plant-normal.jpg';
+import Svg, { Circle } from 'react-native-svg';
 import TopBarMmenu from './assets/top-bar-menu.svg';
+import { House, ListMagnifyingGlass, ChatsCircle } from 'phosphor-react-native';
+
+import { styles } from './styles';
 
 export default function App() {
+
+  const classNames = ["face", "pencil"];
+
+  const modelJSON = require('./assets/models/model.json');
+  const modelWeights = require('./assets/models/model.weights.bin');
+
+
   const [selectedImageUri, setSelectedImageUri] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [results, setResults] = useState<ClassificationProps[]>([]);
@@ -26,7 +30,7 @@ export default function App() {
     setIsLoading(true);
     try {
       const result = await imagePicker.launchImageLibraryAsync({
-        mediaTypes: imagePicker.MediaTypeOptions.Images,
+        mediaTypes: ['images'],
         allowsEditing: true,
         aspect: [4, 3],
         quality: 1,
@@ -48,10 +52,26 @@ export default function App() {
     setResults([]);
     await tf.ready();
     try {
-      const model = await mobilenet.load();
+      const model = await tf
+        .loadLayersModel(bundleResourceIO(modelJSON, modelWeights))
+        .catch((e) => {
+          console.log('[LOADING ERROR] infosssss:', e);
+        });
+
+      if (!model) return;
+
       const tensor = await createImageTensor(imageUri);
-      const classificationResult = await model.classify(tensor);
-      setResults(classificationResult);
+      // Cast para any porque model.classify é do MobileNet, não tf.Model
+      const prediction = await (model as any).predict(tensor);
+      const data = await prediction.array(); // data = [[0.1, 0.9]]
+      const mappedResults = data[0].map((prob: number, i: number) => ({
+        className: classNames[i],
+        probability: prob,
+      }));
+      setResults(mappedResults);
+      console.log('Resultados interpretados:', mappedResults);
+
+
     } catch (error) {
       console.log('Erro na classificação da imagem:', error);
     }
@@ -63,8 +83,22 @@ export default function App() {
     });
     const imgBuffer = tf.util.encodeString(imgB64, 'base64').buffer;
     const uint8 = new Uint8Array(imgBuffer);
-    return decodeJpeg(uint8);
+
+    // Decodificar a imagem
+    const tensor = decodeJpeg(uint8);
+
+    // Redimensionar a imagem para o tamanho esperado pelo modelo (por exemplo, 224x224 para MobileNet)
+    const resizedTensor = tf.image.resizeBilinear(tensor, [224, 224]);
+
+    // Normalizar os valores para [0, 1] (se necessário para o seu modelo)
+    const normalizedTensor = resizedTensor.div(tf.scalar(255));
+
+    // Adicionar uma dimensão extra para o batch size (passar para [1, 224, 224, 3])
+    const batchedTensor = normalizedTensor.expandDims(0);
+
+    return batchedTensor;
   };
+
 
   return (
     <View style={styles.container}>
@@ -75,7 +109,7 @@ export default function App() {
 
       {/* Resultados */}
       <View style={styles.results}>
-        {results.map(result => (
+        {results.map((result) => (
           <Classification key={result.className} data={result} />
         ))}
       </View>
@@ -106,7 +140,7 @@ export default function App() {
 
         <View style={styles.menuComponent}>
           <TouchableOpacity style={styles.menuItem}>
-            <House size={28} color="#7d7d7d" />
+            <House size={32} color="#CBE4B4" />
             <Text style={styles.menuText}>Home</Text>
           </TouchableOpacity>
 
@@ -119,7 +153,7 @@ export default function App() {
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.menuItem}>
-            <ChatsCircle size={28} color="#7d7d7d" />
+            <ChatsCircle size={32} color="#CBE4B4" />
             <Text style={styles.menuText}>Consult</Text>
           </TouchableOpacity>
         </View>
