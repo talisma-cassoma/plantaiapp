@@ -16,7 +16,8 @@ import { styles } from './styles';
 
 export default function App() {
 
-  const classNames = ["face", "pencil"];
+  const labelsFile = require('./assets/models/labels.json');
+  const classNames = labelsFile.labels;
 
   const modelJSON = require('./assets/models/model.json');
   const modelWeights = require('./assets/models/model.weights.bin');
@@ -55,27 +56,32 @@ export default function App() {
       const model = await tf
         .loadLayersModel(bundleResourceIO(modelJSON, modelWeights))
         .catch((e) => {
-          console.log('[LOADING ERROR] infosssss:', e);
+          console.log('[LOADING ERROR]:', e);
         });
-
+  
       if (!model) return;
-
+  
+      const startPreprocess = global.performance.now();
       const tensor = await createImageTensor(imageUri);
-      // Cast para any porque model.classify é do MobileNet, não tf.Model
+      const endPreprocess = global.performance.now();
+      console.log(`Tempo de processamento da imagem: ${Math.round(endPreprocess - startPreprocess)} ms o equivalente a ${Math.round((endPreprocess - startPreprocess)/1000)} segundos`);
+  
+      const startInference = global.performance.now();
       const prediction = await (model as any).predict(tensor);
-      const data = await prediction.array(); // data = [[0.1, 0.9]]
+      const data = await prediction.array();
+      const endInference = global.performance.now();
+      console.log(`Tempo de inferência: ${Math.round(endInference - startInference)} ms o equivalente a ${Math.round((endInference - startInference)/1000)} segundos`);
+  
       const mappedResults = data[0].map((prob: number, i: number) => ({
         className: classNames[i],
         probability: prob,
       }));
       setResults(mappedResults);
-      console.log('Resultados interpretados:', mappedResults);
-
-
     } catch (error) {
       console.log('Erro na classificação da imagem:', error);
     }
   };
+  
 
   const createImageTensor = async (imageUri: string) => {
     const imgB64 = await FileSystem.readAsStringAsync(imageUri, {
