@@ -89,7 +89,7 @@ export const styles = StyleSheet.create({
       flexDirection:'row',
       justifyContent:'space-between',
       paddingHorizontal: 30,
-      paddingVertical: 10,
+      paddingVertical: 5,
       width: '100%',
       height: 70
     },
@@ -103,7 +103,7 @@ export const styles = StyleSheet.create({
     },
     menuText: {
       fontSize: 12,
-      marginTop: 4,
+      marginBottom: 4,
       color: '#7d7d7d',
     },
     menuCenterText: {
