@@ -1,85 +1,75 @@
-name: CI/CD
+name: EAS Optimized Deploy
 
 on:
   push:
-    tags:
-      - '*'
+    branches:
+      - main
+      - staging
 
 jobs:
-  CI:
-    name: Continuous Integration
+  ota_or_build:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Setup Node
+      - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 18.x
+          node-version: 18
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
-      - name: Run Tests
-        run: npm test
-  
-  CD: 
-    name: Continuous Delivery
-    runs-on: ubuntu-latest
+      - name: Install EAS CLI
+        run: npm install -g eas-cli@latest
 
-    needs: CI
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Setup Node
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18.x
-
-      - name: Setup EAS
-        uses: expo/expo-github-action@v8
-        with:
-          eas-version: latest
-          packager: npm
-          token: ${{ secrets.EAS_EXPO_TOKEN }}
-
-      - name: Install Dependencies
-        run: npm install
-
-      - name: Get config file
-        env: 
-          GOOGLE_SERVICES_64: ${{ secrets.EAS_GOOGLE_PLAY_API }}
+      - name: Set EAS token
         run: |
-          echo $GOOGLE_SERVICES_64 > google-services.json.b64
-          base64 -d -i google-services.json.b64 > google-services.json
+          echo "EXPO_ACCESS_TOKEN=${{ secrets.EXPO_ACCESS_TOKEN }}" >> $GITHUB_ENV
+          echo "EXPO_TOKEN=${{ secrets.EXPO_ACCESS_TOKEN }}" >> $GITHUB_ENV
 
-      - name: Build APK with EAS
+      - name: Set profile and branch variables
         run: |
-          EXPO_APPLE_APP_SPECIFIC_PASSWORD=${{ secrets.EAS_APPLE_APP_SPECIFIC_PASSWORD }} \
-          eas build --platform android --profile preview --non-interactive --no-wait
+          BRANCH_NAME="${GITHUB_REF##*/}"
+          if [ "$BRANCH_NAME" == "staging" ]; then
+            echo "PROFILE=preview" >> $GITHUB_ENV
+            echo "BRANCH=staging" >> $GITHUB_ENV
+          else
+            echo "PROFILE=production" >> $GITHUB_ENV
+            echo "BRANCH=production" >> $GITHUB_ENV
+          fi
 
-      - name: Download APK from EAS
+      - name: Check for native folders
+        id: check_native
         run: |
-          mkdir -p artifacts
-          mv $(ls -t | grep ".apk" | head -n1) artifacts/app-release.apk
+          if [ -d "android" ] || [ -d "ios" ]; then
+            echo "HAS_NATIVE=true" >> $GITHUB_ENV
+          else
+            echo "HAS_NATIVE=false" >> $GITHUB_ENV
+          fi
 
-      - name: Upload APK as Artifact
+      - name: Publish OTA update
+        run: eas update --branch ${{ env.BRANCH }} --platform all --non-interactive --message "CI update from GitHub Actions"
+
+      - name: Build Android APK
+        if: env.HAS_NATIVE == 'true'
+        run: eas build --platform android --profile ${{ env.PROFILE }} --non-interactive --message "CI update from GitHub Actions"
+
+      - name: Build iOS (if macOS)
+        if: env.HAS_NATIVE == 'true' && runner.os == 'macOS'
+        run: eas build --platform ios --profile ${{ env.PROFILE }} --non-interactive --message "CI update from GitHub Actions"
+
+      - name: Upload Android artifact
+        if: env.HAS_NATIVE == 'true'
         uses: actions/upload-artifact@v4
         with:
-          name: app-release
-          path: artifacts/app-release.apk
+          name: android-apk
+          path: ./build/android/*.apk
 
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
+      - name: Upload iOS artifact
+        if: env.HAS_NATIVE == 'true' && runner.os == 'macOS'
+        uses: actions/upload-artifact@v4
         with:
-          files: artifacts/app-release.apk
-          token: ${{ secrets.GITHUB_TOKEN }}
-          tag_name: ${{ github.ref }}
-          name: "Release ${{ github.ref_name }}"
-          body: "Nova versão disponível! 🚀"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          name: ios-ipa
+          path: ./build/ios/*.ipa

@@ -29,7 +29,8 @@
     "react-native-fs": "^2.20.0",
     "react-native-svg": "^15.11.2",
     "react-native-reanimated": "~3.16.1",
-    "@shopify/react-native-skia": "1.5.0"
+    "@shopify/react-native-skia": "1.5.0",
+    "expo-updates": "~0.27.4"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

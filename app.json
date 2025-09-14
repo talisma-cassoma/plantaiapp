@@ -17,7 +17,10 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "runtimeVersion": {
+        "policy": "appVersion"
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -26,9 +29,12 @@
       },
       "permissions": [
         "android.permission.RECORD_AUDIO",
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO",
         "android.permission.CAMERA"
       ],
-      "package": "com.anonymous.app"
+      "package": "com.anonymous.app",
+      "runtimeVersion": "1.0.0"
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -53,6 +59,10 @@
       "eas": {
         "projectId": "a6fe83bc-d957-4d40-bb57-5f360a933107"
       }
+    },
+    "owner": "talismadev",
+    "updates": {
+      "url": "https://u.expo.dev/a6fe83bc-d957-4d40-bb57-5f360a933107"
     }
   }
 }
