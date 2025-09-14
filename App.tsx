@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, Image, TouchableOpacity, Dimensions, ActivityIndicator } from 'react-native';
 
 import { ImageUriProvider, useImageUri } from './context/ImageUriContext';
-import  Classification  from './components/classification';
+import  Classification  from '@/components/classification';
 import * as imagePicker from 'expo-image-picker';
 
 
