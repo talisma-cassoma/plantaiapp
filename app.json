@@ -26,8 +26,6 @@
       },
       "permissions": [
         "android.permission.RECORD_AUDIO",
-        "android.permission.CAMERA",
-        "android.permission.RECORD_AUDIO",
         "android.permission.CAMERA"
       ],
       "package": "com.anonymous.app"
@@ -50,6 +48,11 @@
           "recordAudioAndroid": true
         }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "a6fe83bc-d957-4d40-bb57-5f360a933107"
+      }
+    }
   }
 }
