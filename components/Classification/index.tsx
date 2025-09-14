@@ -14,7 +14,7 @@ export type ClassificationProps = {
   isTopResult?: boolean;
 };
 
-export function Classification() {
+export default function Classification() {
   const { selectedImageUri, setIsLoading } = useImageUri();
 
   const classificationlabelsFile = require('../../assets/models/classification/labels.json');
