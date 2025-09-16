@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { View, Text, Image, TouchableOpacity, Dimensions, ActivityIndicator } from 'react-native';
 
-import { ImageUriProvider, useImageUri } from './context/ImageUriContext';
-import  Classification  from '@/components/classification';
+import { ImageUriProvider, useImageUri } from './src/context/ImageUriContext';
+import  Classification  from '@/src/components/classification';
 import * as imagePicker from 'expo-image-picker';
 
 
@@ -11,9 +11,9 @@ import TopBarMmenu from './assets/top-bar-menu.svg';
 import { House, ListMagnifyingGlass, ChatsCircle } from 'phosphor-react-native';
 
 import { styles } from './styles';
-import { theme } from './globals/styles/theme';
+import { theme } from './src/globals/styles/theme';
 
-import Segmentation from './components/segmentation';
+import Segmentation from './src/components/segmentation';
 
  const AppContent = () => {
 
