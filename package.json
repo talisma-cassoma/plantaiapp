@@ -1,7 +1,7 @@
 {
   "name": "app",
   "version": "1.0.0",
- "main": "expo-router/entry",
+  "main": "src/index.ts",
   "scripts": {
     "start": "expo start",
     "android": "expo run:android",
@@ -41,6 +41,9 @@
     "babel-plugin-module-resolver": "^5.0.2",
     "react-native-svg-transformer": "^1.5.0",
     "typescript": "^5.7.2"
+  },
+  "resolutions": {
+    "@types/minimatch": "5.1.2"
   },
   "private": true,
   "description": "<p>PlantAiApp uses AI-powered image analysis to detect plant diseases, pinpoint affected areas, and assess severity. With real-time insights and personalized advice through our chatbot, you can take control of your plantation’s health and make informed decisions quickly. Precision farming made simple, for stronger growth and higher yields.</p>",
