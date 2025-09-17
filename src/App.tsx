@@ -10,8 +10,8 @@ import Svg, { Circle } from 'react-native-svg';
 import TopBarMmenu from './assets/top-bar-menu.svg';
 import { House, ListMagnifyingGlass, ChatsCircle } from 'phosphor-react-native';
 
-import { styles } from '../styles';
-import { theme } from './globals/styles/theme';
+import { styles } from './styles';
+import { theme } from './styles/theme';
 
 import Segmentation from './components/segmentation';
 
